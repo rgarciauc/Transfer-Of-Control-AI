@@ -1,0 +1,7 @@
+%------------------------------------------------------------------------------
+%% in_control:= {human, semi_autonomous_car}
+%% transfer_of_control_initiator:= {human, semi_autonomous_car}
+%------------------------------------------------------------------------------
+%------------------------------------------------------------------------------
+in_control(semi_autonomous_car).
+transfer_of_control_initiator(semi_autonomous_car).

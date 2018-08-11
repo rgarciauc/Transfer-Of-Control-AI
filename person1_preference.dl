@@ -1,0 +1,23 @@
+% Universal setting for adult; No light show
+%------------------------------------------------------------------------------
+% preference_language:= {en-english, es-spanish, ger-german};universal language setting
+% preference_audio:= {on, off}
+% preference_volume:= {low, medium}--------------please change med to medium
+% preference_text:= {on, off}
+% preference_text_size:= {small, medium, large}---------------please change med to medium
+% preference_image:= {on, off}
+% preference_image_size:= {small, medium, large}--------------please change med to medium
+% preference_light:= {on, off}
+%------------------------------------------------------------------------------
+%------------------------------------------------------------------------------
+preference_language(en).
+preference_audio(on).
+preference_volume(hight).
+preference_text(on).
+preference_text_size(medium).
+preference_image(off).
+preference_image_size(medium).
+preference_light(on).
+
+
+

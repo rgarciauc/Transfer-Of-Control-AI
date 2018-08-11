@@ -1,0 +1,106 @@
+#!/bin/bash
+#Rubén García
+
+function transfer_control()
+{
+    #TODO
+    echo -en "Please press enter"
+    read
+    clear
+}
+
+
+function countdown(){
+   date1=$((`date +%s` + $1)); 
+   while [ "$date1" -ge `date +%s` ]; do 
+     echo -ne "$(date -u --date @$(($date1 - `date +%s`)) +%S)\r";
+     sleep 0.1
+   done
+}
+
+toc_call()
+{
+#Read from the partial output
+out_en_cat=`cat solution.out`; 
+#Call to the countdown 
+#Variables to be used to select the language of the audio
+en="there_is_a_hazard"
+es="peligro_inminente"
+ger="achtung_pass_auf"
+
+#Variables to be used to select the type of hazard
+#to offer more information about the hazard
+construction="construction"
+accident="accident"
+
+#to select the language of the audio, according emergency
+volumehigh="urgency(high)"
+volumemed="urgency(med)"
+volumelow="urgency(low)"
+
+if  grep -Fq $volumehigh solution.out; then
+	amixer -D pulse sset Master 80%
+elif  grep -Fq $volumemed solution.out; then
+	amixer -D pulse sset Master 60%
+elif  grep -Fq $volumelow solution.out; then
+	amixer -D pulse sset Master 30%
+fi
+
+(speaker-test -t sine -f 1000 )& pid=$! ; sleep 0.4s ; kill -9 $pid
+#gedit --width=320 --height=50 --info --text=$out_en  ;sleep 0.20s;
+if  grep -Fq $en solution.out; then
+	#out_en=$(<solution.out) #this command was move above
+	say "There is a hazard, please take the control of the car";sleep 0.10s;
+
+	#TODO Approach where the time is also took into consideration
+	#the human has 8 seconds to take the control of the car	
+
+	if grep -Fq $construction solution.out; then	
+	say "there is a contruction going on"
+	else 
+	say "there is an accident in front of us"	
+	fi
+	zenity --width=300 --height=100 --info --text="$out_en_cat";
+elif  grep -Fq $es solution.out; then
+	say "peligro inminente, por favor toma el control del auto"; sleep 0.10s;
+	
+	if grep -Fq $construction solution.out; then	
+	say "Hay una contrucción "
+	else 
+	say "ha ocurrido un accidente delante de nosotros"	
+	fi
+	zenity --width=300 --height=100 --info --text="$out_en_cat";
+elif  grep -Fq $ger solution.out; then
+	say "Achtung, bitte übernehme die Steuerung des Autos"
+	if grep -Fq $construction solution.out; then	
+	say "Es gibt eine Baustelle vor uns"
+	else 
+	say "Es gibt ein Unfall"	
+	fi
+	zenity --width=300 --height=100 --info --text="$out_en_cat";
+fi
+}
+
+
+until [ "$selection" = "0" ]; do
+    echo "
+    TOC - PROGRAM MENU
+    1 - scenario1
+    2 - scenario2 
+    3 - scenario3 
+    0 - exit program
+"
+    echo -n "Enter your scenario selection: "
+    read selection
+    echo ""
+    case $selection in
+	#consider to add a log using append >> output.log
+	#consider the countdown approach, this will let know the human the time that 		#he still have to take the control of the autonomous car countdown 8
+        1 ) countdown 8 & ./dlv.bin -nofacts -silent  -stats auto_fixed.dl scenario1.dl person1_preference.dl person1_profile.dl TOC.dl > solution.out ; toc_call ;  transfer_control;;
+        2 ) countdown 8 & ./dlv.bin -nofacts -silent  -stats auto_fixed.dl scenario2.dl person2_preference.dl person2_profile.dl TOC.dl > solution.out ; toc_call ;  transfer_control;;
+        3 ) countdown 8 & ./dlv.bin -nofacts -silent  -stats auto_fixed.dl scenario3.dl person3_preference.dl person3_profile.dl TOC.dl > solution.out ; toc_call ;  transfer_control;;
+        0 ) exit ;;
+        * ) echo "Please enter 1, 2, 3 or 0";;
+    esac
+done
+

@@ -1,0 +1,22 @@
+% Universal setting for adult;No light show
+%------------------------------------------------------------------------------
+% if (input_age >= 18 && input_age <= 45) 
+% 	age = "adult";
+% if (input_age > 45)
+% 	age = "elderly";
+
+% profile_age:= {adult, elderly}
+% 		adult[18,45]
+% 		elderly(45, 120]
+% profile_gender:= {male, female}
+% profile_hearing_difficulty:= {yes, no}
+% profile_level:= {new, experienced}
+%		new:={equal or less than 3 years}
+%		experienced:={more than 3 years}
+%------------------------------------------------------------------------------
+%------------------------------------------------------------------------------
+profile_age(elderly).
+profile_gender(woman).
+profile_hearing_difficulty(no). % there is a bug here
+profile_level(new).
+profile_language(en).

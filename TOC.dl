@@ -1,0 +1,146 @@
+% author  Rubén García
+% version 1.0, 07/18
+
+%TODO: there is a hazard present in mittle of the street
+hazard(construction) v hazard(accident).
+
+%at most one user current activity, in the future it is possible to add more activities
+user_current_activity(listening_music) v user_current_activity(reading) v user_current_activity(watching_tv).
+
+%at most one user cognitive load
+user_cognitive_load(low) v user_cognitive_load(medium) v user_cognitive_load(high).
+
+%at most one profile_language
+profile_language(en) v profile_language(es) v profile_language(ger).
+
+%Does the driver hearing_difficulty
+profile_hearing_difficulty(no) v profile_hearing_difficulty(yes).
+
+% there is at most one emergency level
+urgency(low) v urgency(medium) v urgency(high).
+
+% there is at most one driving condition
+driving_condition(normal) v driving_condition(night_driving).
+
+% the cognitive level will depends on the user current activity
+user_cognitive_load(low):- user_current_activity(reading).
+user_cognitive_load(medium):- user_current_activity(listening_music).
+user_cognitive_load(high):- user_current_activity(watching_tv).
+
+%at most one range of age, just for the purpose of prototyping
+profile_age(adult) v profile_age(elderly).
+
+%TODO: consider the noob case
+profile_level(new) v profile_level(experienced). %TODO: still not used
+
+%at most one gender to be choosen
+profile_gender(woman) v profile_gender(man). %TODO: still not used
+
+%preference to be showed text as an output
+preference_text(off) v preference_text(on).
+%there are at least one output in case of a hazard
+
+%taking into account the preference the complexity increase TODO:
+%preference_language(en) v preference_language(en) v preference_language(en).
+%preference_audio(on) v preference_audio(off).
+%preference_volume(low) v preference_volume(medium).
+%preference_text(off) v preference_text(on).
+%preference_text_size(small) v preference_text_size(small) v preference_text_size(small).
+%preference_image(on) v preference_image(off).
+%preference_image_size(small) v preference_image_size(medium) v preference_image_size(large).
+%preference_light(on) v preference_light(off).
+
+:-urgency(high), -urgency(low), -urgency(medium).
+:-urgency(low), -urgency(high), -urgency(medium).
+:-urgency(medium), -urgency(low), -urgency(high).
+
+%restriction related to the profile language the fact that there is just on language 
+:-profile_language(en), -profile_language(es), -profile_language(ger).
+:-profile_language(es), -profile_language(en), -profile_language(ger).
+:-profile_language(ger), -profile_language(es), -profile_language(en).
+
+:-hazard(construction), -hazard(accident).
+
+%:--profile_gender(man),profile_gender(woman).
+:-profile_gender(man), not profile_gender(woman).
+
+
+%:-profile_level(experienced), profile_level(new).
+:-profile_level(new), -profile_level(experienced).
+
+:-profile_age(adult), -profile_age(elderly).
+:-profile_hearing_difficulty(no), -profile_hearing_difficulty(yes).
+:-driving_condition(normal), -driving_condition(night_driving).
+
+%:- preference_text(off), -preference_text(on).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Facts will be called from different documents according scenarios
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%in the situation presented a semi autonomous car is in control, since
+%in our prototype the semiautonomous car is always in control we do not consider this %variable.
+ 
+%show(everything_fine):-in_Control(semi_autonomous_car).
+
+%TODO The reason of the activation must be define
+hazard(construction) v hazard(accident):-reason(hazard). 
+%TODO: add weight and priorities for the following rules
+
+%messages to be output in the display of the car
+show_in_display(there_is_a_hazard, H) :- profile_language(L), L=en, hazard(H), outputtext.
+show_in_display(peligro_inminente, H) :- profile_language(L), L=es, hazard(H), outputtext.
+show_in_display(achtung_pass_auf, H) :- profile_language(L), L=ger, hazard(H), outputtext.
+
+%messages to be delivered using voice Generator
+say(there_is_a_hazard, H) :- profile_language(L), L=en, hazard(H), outputaudio.
+say(peligro_inminente, H) :- profile_language(L), L=es, hazard(H), outputaudio.
+say(achtung_pass_auf, H) :- profile_language(L), L=ger, hazard(H), outputaudio.
+
+%there is a hazard present
+activate_channel_output_for(X):-reason(hazard), in_control(semi_autonomous_car), hazard(X).
+
+%the user is performing an activity, 
+%the activities selected are list
+
+outputlight:-user_current_activity(listening_music).
+outputaudio:-user_current_activity(reading).
+
+outputlight:-user_current_activity(watching_tv).
+outputtext:-user_current_activity(watching_tv).
+
+%constrains related to the age
+outputtext:- profile_age(A), A=adult.
+
+outputlight:- profile_age(A), A=elderly.
+outputaudio:- profile_age(A), A=elderly.
+outputtext:- profile_age(A), A=elderly.
+
+%constrains related to the unexperience humans
+outputlight:-profile_level(N), N=new. 
+outputaudio:-profile_level(N), N=new. 
+outputtext:-profile_level(N), N=new. 
+
+
+%example person who is old but he does not get any text as an output
+%appears, not_appears
+%-outputtext:- profile_age(A), A=elderly, preference_text(off).%TODO add weight!!!!
+%:- preference_text(off), outputtext. 
+%outputtext:- profile_age(A), A=elderly.
+
+%constrains related to the urgency
+outputlight:- urgency(U), profile_age(A), U=low, A=elderly.
+outputlight:- urgency(U), profile_age(A).
+outputaudio:- urgency(U), profile_age(A), U=low, A=adult.
+
+outputtext:- urgency(U), U=low, -urgency(medium), -urgency(high).
+
+% profile_hearing_difficulty(yes) there is a bug here TODO
+-outputaudio:- profile_hearing_difficulty(yes).
+
+% night driving allways show light!
+outputlight:-driving_condition(night_driving).
+%-outputlight:-driving_condition(normal), outputlight. %TODO If scenario during the day
+
+%preference_text(on)
+outputtext:-preference_text(on).

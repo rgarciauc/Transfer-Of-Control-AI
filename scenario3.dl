@@ -1,0 +1,12 @@
+% Construction_level_1_variables
+%--------------------------------------------------------------------------
+% hazard:={construction, accident}
+% urgency:={low, medium, high}
+% user_current_activity:={reading, listening_music, watching_tv}
+% driving_condition:= {normal, night_driving}
+%--------------------------------------------------------------------------
+%--------------------------------------------------------------------------
+hazard(construction). 
+urgency(high). 
+user_current_activity(reading).
+driving_condition(normal).
